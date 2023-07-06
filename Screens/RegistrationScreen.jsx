@@ -1,208 +1,188 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
-  Pressable,
   StyleSheet,
   Text,
+  View,
   TextInput,
   TouchableOpacity,
-  View,
+  Platform,
+  KeyboardAvoidingView,
+  Keyboard,
 } from "react-native";
-import { useKeyboardListener } from "../helpers/hooks";
-import { colors } from "../helpers/vars";
 
-export const RegistrationScreen = () => {
-  const [isFocused, setIsFocused] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isIconActive, setIsIconActive] = useState(false);
+const initialState = {
+  login: "",
+  email: "",
+  password: "",
+};
 
-  const isKeyboardShown = useKeyboardListener();
+export default function RegistrationScreen() {
+  const [state, setState] = useState(initialState);
+  const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+  const [isShowPassword, setIsShowPassword] = useState(false);
+  
 
-  const initialState = {
-    name: "",
-    email: "",
-    password: "",
-  };
-  const [userState, setUserState] = useState(initialState);
-
-  const onSubmit = () => {
-    const { name, email, password } = userState;
-    if (!name || !email || !password) {
-      alert("необхідно заповнити всі поля");
-    }
-    console.log(userState);
-    setUserState(initialState);
+  const keyboardHide = () => {
+    setIsShowKeyboard(false);
+    Keyboard.dismiss();
+       console.log(state);
+       setState(initialState);
+       setIsShowPassword(false);
   };
 
   return (
-    <View style={{ ...styles.form, marginBottom: isKeyboardShown ? -180 : 0 }}>
-      <Text style={styles.formTitle}>Реєстрація</Text>
-      <TextInput
-        style={[styles.input, isFocused === "name" && styles.inputFocused]}
-        placeholder="Логін"
-        placeholderTextColor={colors.placeholderTextColor}
-        onChangeText={(value) =>
-          setUserState((state) => ({ ...state, name: value.trim() }))
-        }
-        onFocus={() => {
-          setIsFocused("name");
-        }}
-        onBlur={() => setIsFocused(false)}
-        value={userState.name}
-      ></TextInput>
-      <TextInput
-        style={[styles.input, isFocused === "email" && styles.inputFocused]}
-        placeholder="Адреса електронної пошти"
-        placeholderTextColor={colors.placeholderTextColor}
-        onChangeText={(value) =>
-          setUserState((state) => ({ ...state, email: value.trim() }))
-        }
-        onFocus={() => {
-          setIsFocused("email");
-        }}
-        onBlur={() => setIsFocused(false)}
-        value={userState.email}
-      ></TextInput>
-      <View style={styles.passwordWrapper}>
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : ""}>
+      <View style={styles.form}>
+        <View style={styles.image}>
+          <TouchableOpacity style={styles.btnAddImage}>
+            <Text style={styles.textAddImage}>+</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.title}>Реєстрація</Text>
         <TextInput
-          style={[
-            styles.input,
-            isFocused === "password" && styles.inputFocused,
-          ]}
-          placeholder="Пароль"
-          placeholderTextColor={colors.placeholderTextColor}
+          style={styles.input}
+          placeholder="Логін"
+          value={state.login}
+          onFocus={() => setIsShowKeyboard(true)}
           onChangeText={(value) =>
-            setUserState((state) => ({ ...state, password: value.trim() }))
+            setState((prevState) => ({ ...prevState, login: value }))
           }
-          onFocus={() => {
-            setIsFocused("password");
-          }}
-          onBlur={() => setIsFocused(false)}
-          value={userState.password}
-        ></TextInput>
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Адреса електронної пошти"
+          value={state.email}
+          onFocus={() => setIsShowKeyboard(true)}
+          onChangeText={(value) =>
+            setState((prevState) => ({ ...prevState, email: value }))
+          }
+        />
+        <View style={styles.inputBox}>
+          <TextInput
+            style={styles.input}
+            placeholder="Пароль"
+            value={state.password}
+            secureTextEntry={isShowPassword ? false : true}
+            onFocus={() => setIsShowKeyboard(true)}
+            onChangeText={(value) =>
+              setState((prevState) => ({ ...prevState, password: value }))
+            }
+          />
+          <TouchableOpacity
+            style={styles.btnShowPassword}
+            onPress={() => setIsShowPassword(true)}
+          >
+            <Text style={styles.textShowPassword}>
+              {isShowPassword ? "Показати" : "Приховати"}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity
-          onPress={() => setShowPassword(!showPassword)}
-          style={styles.passwordToggleButton}
-          activeOpacity={0.8}
+          activeOpacity={0.7}
+          style={styles.button}
+          onPress={keyboardHide}
         >
-          <Text style={styles.passwordToggleButtonText}>
-            {showPassword ? "Сховати" : "Показати"}
-          </Text>
+          <Text style={styles.text}>Реєстрація</Text>
         </TouchableOpacity>
+        <Text style={styles.link}>Вже є акаунт? Увійти</Text>
       </View>
-
-      <TouchableOpacity
-        style={styles.btnSign}
-        title="Зареєстуватися"
-        onPress={onSubmit}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.btnText}>Зареєстуватися</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.linkLogin}>Вже є акаунт? Увійти</Text>
-
-      <View style={styles.photoBox}>
-        <Pressable
-          onPress={() => setIsIconActive(!isIconActive)}
-          style={styles.iconWrapper}
-        >
-          {isIconActive ? (
-            <Ionicons
-              name="ios-close-circle-outline"
-              size={27}
-              color={colors.placeholderTextColor}
-            ></Ionicons>
-          ) : (
-            <Ionicons
-              name="add-circle-outline"
-              size={27}
-              color={colors.orange}
-            ></Ionicons>
-          )}
-        </Pressable>
-      </View>
-    </View>
+    </KeyboardAvoidingView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   form: {
+    height: 549,
     width: "100%",
-    position: "absolute",
-    bottom: 0,
-    backgroundColor: colors.formBackgroundColor,
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    paddingHorizontal: 16,
+    position: "relative",
     paddingTop: 92,
-    paddingBottom: 78,
-  },
-  formTitle: {
-    fontSize: 30,
-    marginBottom: 32,
-    textAlign: "center",
-    fontFamily: "Roboto-Medium",
-  },
-  input: {
-    height: 50,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.inputBorderColor,
-    backgroundColor: colors.backgroundColor,
-    borderRadius: 8,
-    marginBottom: 10,
-    fontSize: 16,
-    fontFamily: "Roboto-Regular",
-    color: colors.inputTextColor,
-  },
-  inputFocused: {
-    borderColor: colors.orange,
-  },
-  passwordToggleButton: {
-    position: "absolute",
-    right: 16,
-    top: "50%",
-    transform: [{ translateY: -17 }],
-  },
-  passwordToggleButtonText: {
-    fontSize: 16,
-    color: colors.blue,
-    fontFamily: "Roboto-Regular",
-  },
-  btnSign: {
-    height: 51,
-    backgroundColor: colors.orange,
-    borderRadius: 100,
+    paddingHorizontal: 16,
     alignItems: "center",
-    justifyContent: "center",
-    marginTop: 43,
   },
-  btnText: {
-    fontSize: 16,
-    color: colors.btnTextColor,
-    fontFamily: "Roboto-Regular",
-  },
-  linkLogin: {
-    fontSize: 16,
-    textAlign: "center",
-    marginTop: 16,
-    color: colors.blue,
-  },
-  photoBox: {
-    backgroundColor: colors.backgroundColor,
-    width: 120,
+
+  image: {
+    position: "absolute",
+    width: 132,
     height: 120,
+    backgroundColor: "#F6F6F6",
     borderRadius: 16,
-    position: "absolute",
-    alignSelf: "center",
-    top: -60,
+    top: -50,
   },
-  iconWrapper: {
+
+  btnAddImage: {
     position: "absolute",
-    right: -12.5,
-    bottom: 20,
-    maxWidth: 25,
+    bottom: 14,
+    right: -12,
+    width: 25,
+    height: 25,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 50,
+    borderWidth: 1,
+    borderColor: "#FF6C00",
+    color: "#FF6C00",
+    alignItems: "center",
+  },
+
+  textAddImage: {
+    fontSize: 15,
+    color: "#FF6C00",
+  },
+
+  title: {
+    marginBottom: 32,
+    fontSize: 30,
+    fontWeight: 500,
+    color: "#212121",
+  },
+
+  input: {
+    width: "100%",
+    height: 50,
+    marginBottom: 16,
+    padding: 16,
+    color: "#BDBDBD",
+    backgroundColor: "#F6F6F6",
+    borderWidth: 1,
+    borderColor: "#E8E8E8",
+    borderRadius: 8,
+  },
+
+  inputBox: {
+    width: "100%",
+    position: "relative",
+  },
+
+  btnShowPassword: {
+    position: "absolute",
+    right: 10,
+    top: 14,
+  },
+
+  textShowPassword: {
+    color: "#1B4371",
+  },
+
+  button: {
+    width: "100%",
+    paddingVertical: 16,
+    marginTop: 20,
+    marginBottom: 16,
+    alignItems: "center",
+    backgroundColor: "#FF6C00",
+    borderRadius: 100,
+  },
+
+  text: {
+    fontSize: 16,
+    color: "#FFFFFF",
+  },
+
+  link: {
+    color: "#1B4371",
   },
 });
